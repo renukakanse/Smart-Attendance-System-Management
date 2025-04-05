@@ -8,7 +8,7 @@ Daily tasks like attendance, timetable updates, event coordination, and student 
 
 Schools need a centralized digital platform to manage these tasks smartly and efficiently.
 
-Doned Work:- Added Dashboard, Events, and Timetable pages for Admin/Teacher panel with basic UI and navigation.
+Completed Task- Builed Dashboard, Events, and Timetable pages for Admin/Teacher panel with basic UI and navigation.
 
 Dashboard – Displays overall stats and quick access links
 
