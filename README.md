@@ -10,7 +10,7 @@ Schools need a centralized digital platform to manage these tasks smartly and ef
 
 Completed Task:
 
-Built Dashboard, Events, and Timetable pages for Admin/Teacher panel with basic UI and navigation.
+Built Login-in ,Dashboard, Events, and Timetable, pages for Admin/Teacher panel with basic UI and navigation.
 
 Dashboard – Displays overall stats and quick access links
 
