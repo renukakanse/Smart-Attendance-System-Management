@@ -10,16 +10,15 @@ if ($conn->connect_error) {
 
 // Handle Sign Up
 if (isset($_POST['signup'])) {
-    $name = $_POST['name'];
+    $role = $_POST['role'];
     $email = $_POST['email'];
     $password = $_POST['password'];
     
-    $name_pattern = "/^[a-zA-Z ]{2,30}$/";
     $email_pattern = "/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/";
     $password_pattern = "/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/";
     
-    if (!preg_match($name_pattern, $name)) {
-        $_SESSION['message'] = "Name should be 2-30 characters long and contain only letters";
+    if (!in_array($role, ['admin', 'teacher', 'student'])) {
+        $_SESSION['message'] = "Please select a valid role";
     }
     elseif (!preg_match($email_pattern, $email)) {
         $_SESSION['message'] = "Please enter a valid email address";
@@ -37,13 +36,12 @@ if (isset($_POST['signup'])) {
             $_SESSION['message'] = "Email already exists";
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $name, $email, $hashed_password);
+            $stmt = $conn->prepare("INSERT INTO users (role, email, password) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $role, $email, $hashed_password);
             
             if ($stmt->execute()) {
                 $_SESSION['message'] = "Registration successful! Please sign in.";
-                header("Location: index.php");
-                exit();
+                // Instead of redirecting to dashboard, we'll switch to sign-in panel via JavaScript
             } else {
                 $_SESSION['message'] = "Error: " . $conn->error;
             }
@@ -66,9 +64,22 @@ if (isset($_POST['signin'])) {
         $row = $result->fetch_assoc();
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
-            $_SESSION['user_name'] = $row['name'];
+            $_SESSION['user_role'] = $row['role'];
+            
             $_SESSION['message'] = "Login successful!";
-            header("Location: dashboard.php");
+            switch($row['role']) {
+                case 'admin':
+                    header("Location: dashboard.php");
+                    break;
+                case 'teacher':
+                    header("Location: t-dashboard.php");
+                    break;
+                case 'student':
+                    header("Location: std-dashboard.php");
+                    break;
+                default:
+                    header("Location: std-dashboard.php");
+            }
             exit();
         } else {
             $_SESSION['message'] = "Incorrect password";
@@ -151,13 +162,29 @@ if (isset($_POST['signin'])) {
             border-color: #FFFFFF;
         }
 
-        input {
+        input, select {
             background-color: #eee;
             border: none;
             padding: 12px 15px;
             margin: 8px 0;
             width: 100%;
             border-radius: 5px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position-x: 98%;
+            background-position-y: 50%;
+        }
+
+        select:focus {
+            outline: none;
+            background-color: #e0e0e0;
         }
 
         .container {
@@ -244,7 +271,7 @@ if (isset($_POST['signin'])) {
 
         .overlay {
             background: linear-gradient(to right, #1976d2, #0d47a1);
-            color: #FFFFFF;
+        color: #FFFFFF;
             position: relative;
             left: -100%;
             height: 100%;
@@ -314,7 +341,12 @@ if (isset($_POST['signin'])) {
             <div class="card">
                 <form action="" method="POST">
                     <h1>Create Account</h1>
-                    <input type="text" name="name" placeholder="Name" required />
+                    <select name="role" required>
+                        <option value="" disabled selected>Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                    </select>
                     <input type="email" name="email" placeholder="Email" required />
                     <input type="password" name="password" placeholder="Password" required />
                     <button type="submit" name="signup">Sign Up</button>
@@ -359,6 +391,11 @@ if (isset($_POST['signin'])) {
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
+
+        // Check if signup was successful and switch to sign-in panel
+        <?php if (isset($_POST['signup']) && isset($_SESSION['message']) && $_SESSION['message'] === "Registration successful! Please sign in.") { ?>
+            container.classList.remove("right-panel-active");
+        <?php } ?>
 
         setTimeout(() => {
             const notification = document.querySelector('.notification');

@@ -353,7 +353,7 @@ if (isset($_GET['edit'])) {
         <aside class="sidebar">
             <div class="logo"><h2>MySchool</h2></div>
             <div class="user-info">
-                <img src="logo.jpeg" alt="User Avatar" class="avatar">
+                <img src="ad.jpeg" alt="User Avatar" class="avatar">
                 <span>admin007</span>
             </div>
             <nav>
